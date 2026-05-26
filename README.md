@@ -107,20 +107,99 @@ and the math here is re-derived from the canonical Python source.
 
 ## Installation
 
-Requires PixInsight ≥ 1.9.4.
+Requires **PixInsight 1.9.4 "Lockhart"** or later — the scripts use the V8
+JavaScript runtime introduced in 1.9.4 and will not load on the legacy
+SpiderMonkey engine.
 
-**One-off run:** **Script ▸ Execute Script File…** (⌥⌘E on macOS, Alt+E on
-Win/Linux) and pick the `.js` file.
+### Step 1 — Get the scripts onto your machine
 
-**Persistent menu entries:** **Script ▸ Feature Scripts… ▸ Add** and point
-at the folder where you cloned this repo. PI scans the folder for
-`#feature-id` directives and registers all three scripts under
-**Script ▸ salvolm**.
+Pick whichever fits you:
 
-The first time you run each script PI shows an "unsigned script" warning.
-Tick *Don't ask again for this script* and proceed — this is the standard
-behaviour for any third-party PJSR script that isn't published through a
-signed PixInsight update repository.
+**Option A — Download the latest release (no git needed)**
+
+1. Open the [Releases page](https://github.com/salvolm84/pixinsight-scripts/releases).
+2. Under the latest release, click **Source code (zip)**.
+3. Unzip the archive. You'll get a folder named like
+   `pixinsight-scripts-1.0.0/` containing the three `.js` files plus
+   `README.md`, `LICENSE`, etc.
+
+**Option B — Clone with git (recommended if you want one-line updates)**
+
+```bash
+git clone https://github.com/salvolm84/pixinsight-scripts.git
+```
+
+**Where to put the folder.** Anywhere PixInsight can read — but pick a
+stable location so the file paths you'll register with PI in Step 3 keep
+working. Recommended:
+
+- macOS / Linux: `~/Documents/PixInsight/scripts/pixinsight-scripts/`
+- Windows: `C:\Users\<you>\Documents\PixInsight\scripts\pixinsight-scripts\`
+
+Avoid placing it inside the PixInsight application directory itself
+(`/Applications/PixInsight/` on macOS, `C:\Program Files\PixInsight\` on
+Windows) — those paths can be modified by the PI installer on upgrades.
+
+### Step 2 — Quick one-off run (no menu entry needed)
+
+The fastest way to try a script:
+
+1. In PixInsight: **Script ▸ Execute Script File…**
+   - macOS: **⌘ + ⌥ + E** (Cmd + Option + E)
+   - Windows / Linux: **Ctrl + Alt + E**
+2. In the file picker, browse to the folder from Step 1 and select the
+   `.js` you want to run.
+3. The script dialog opens immediately. Close it when you're done — no
+   trace is left in any menu.
+
+Use this when you just want to test a script once.
+
+### Step 3 — Install as permanent menu entries
+
+To make all three scripts appear together under their own submenu:
+
+1. In PixInsight: **Script ▸ Feature Scripts…**
+2. Click **Add**.
+3. In the folder picker, navigate to the folder from Step 1 (the one
+   containing the `.js` files — **not** an individual file) and confirm.
+4. PixInsight scans the folder, finds the three `#feature-id`-tagged
+   scripts, and lists them in the dialog. Make sure all three are
+   checked.
+5. Click **Done**.
+
+The Script menu now contains:
+
+- **Script ▸ salvolm ▸ FITS Reviewer**
+- **Script ▸ salvolm ▸ FWHMEccentricity**
+- **Script ▸ salvolm ▸ VeraLux HyperMetric Stretch**
+
+No restart needed. The registration persists across PixInsight sessions.
+
+### Step 4 — First-run "unsigned script" warning
+
+The first time you launch each script, PixInsight may show a security
+warning along the lines of *"This script is not signed by a trusted
+certificate."* That's expected for any third-party PJSR script that isn't
+published through PI's signed update-repository system (these aren't).
+
+- Tick **Don't ask again for this script**.
+- Click **Yes** / **Continue** to proceed.
+
+PI remembers your choice per script.
+
+### Troubleshooting
+
+- **Scripts don't appear in Feature Scripts after Add.** Make sure you
+  selected the *folder* containing the `.js` files, not an individual
+  file. PI scans directories for `#feature-id` directives.
+- **Menu entry is in the old submenu.** If you registered an earlier
+  version of these scripts, remove the old folder via **Feature
+  Scripts… ▸ Remove**, then **Add** the current folder again. PI only
+  reads `#feature-id` at registration time, so renames don't propagate
+  until you re-register.
+- **Read-only / permission errors on macOS.** Place the folder somewhere
+  unrestricted such as `~/Documents/` rather than the Desktop or a
+  system-managed folder.
 
 ## Updating
 
