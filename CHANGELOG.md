@@ -5,6 +5,20 @@ All notable changes to this repository will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] — 2026-05-26
+
+### Changed
+
+- Expanded the README's **Installation** section into a step-by-step
+  walkthrough: download options (Releases ZIP vs `git clone`),
+  recommended folder locations per OS, quick one-off `Execute Script
+  File…` run with platform keyboard shortcuts, permanent registration
+  via `Feature Scripts…`, the first-run unsigned-script warning, and
+  a short troubleshooting list.
+
+No script logic changed in this release; the published `.js` files are
+identical to v1.0.0.
+
 ## [1.0.0] — 2026-05-26
 
 ### Added
