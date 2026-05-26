@@ -29,7 +29,7 @@
 #define TITLE   "VeraLux HyperMetric Stretch"
 #define VERSION "1.5.2"
 
-#feature-id VeraLux > HyperMetric Stretch
+#feature-id VeraLuxHyperMetric : salvolm > VeraLux HyperMetric Stretch
 
 #feature-info <b>VeraLux HyperMetric Stretch v1.5.2</b> (V8 port)<br/>\
    <br/>\

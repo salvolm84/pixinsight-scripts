@@ -19,7 +19,7 @@
 #define TITLE "FWHMEccentricity"
 #define VERSION "1.5.2"
 
-#feature-id FWHMEccentricity : Image Analysis > FWHMEccentricity
+#feature-id FWHMEccentricity : salvolm > FWHMEccentricity
 
 #feature-info <b>FWHMEccentricity Version 1.5.2</b><br/>\
    <br/>\

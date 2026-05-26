@@ -21,7 +21,7 @@
 
 #engine v8
 
-#feature-id    FitsReviewer : Utilities > FITS Reviewer
+#feature-id    FitsReviewer : salvolm > FITS Reviewer
 #feature-info  Fast review and triage of FITS/XISF files - mark bad frames and copy good ones.
 
 #define VERSION "1.1"

@@ -23,7 +23,7 @@ Fast triage tool for FITS / XISF frames before integration.
 * Copy the unmarked ("good") frames to a destination folder, or optionally
   delete the marked frames from the source.
 
-PI menu entry: **Script ▸ Utilities ▸ FITS Reviewer**.
+PI menu entry: **Script ▸ salvolm ▸ FITS Reviewer**.
 
 License: GPL-3.0-or-later.
 
@@ -48,7 +48,7 @@ The only changes from the legacy script are the V8-required ones:
 * `.prototype.*` enum access on process classes (`DynamicPSF`, `Resample`,
   `Crop`, `StarAlignment`) replaced with `Class.Member`
 
-PI menu entry: **Script ▸ Image Analysis ▸ FWHMEccentricity**.
+PI menu entry: **Script ▸ salvolm ▸ FWHMEccentricity**.
 
 License: PixInsight Class Library License 2.0
 ([PCL License 2.0](https://pixinsight.com/license/PCL-License-2.0.html)) —
@@ -88,7 +88,7 @@ UI additions specific to the PI port:
   statistics
 * All 28 sensor luminance profiles from Python v1.5.2
 
-PI menu entry: **Script ▸ VeraLux ▸ HyperMetric Stretch**.
+PI menu entry: **Script ▸ salvolm ▸ VeraLux HyperMetric Stretch**.
 
 License: GPL-3.0-or-later, inherited from the original Python implementation.
 
@@ -113,8 +113,37 @@ Requires PixInsight ≥ 1.9.4.
 Win/Linux) and pick the `.js` file.
 
 **Persistent menu entries:** **Script ▸ Feature Scripts… ▸ Add** and point
-at the folder where you cloned this repo. Each script registers its own
-sub-menu entry (see "PI menu entry" above for each script).
+at the folder where you cloned this repo. PI scans the folder for
+`#feature-id` directives and registers all three scripts under
+**Script ▸ salvolm**.
+
+The first time you run each script PI shows an "unsigned script" warning.
+Tick *Don't ask again for this script* and proceed — this is the standard
+behaviour for any third-party PJSR script that isn't published through a
+signed PixInsight update repository.
+
+## Updating
+
+The repo is plain GitHub, so updates are a one-liner.
+
+If you cloned with git:
+
+```bash
+cd /path/to/pixinsight-scripts
+git pull
+```
+
+PI's Feature Scripts registration stores absolute paths and reads each
+script from disk on every invocation, so a `git pull` is enough — no need
+to re-register in PI, no restart required. The next time you pick the menu
+entry you'll get the updated script.
+
+If you don't use git, grab the latest **Source code (zip)** from the
+[Releases page](https://github.com/salvolm84/pixinsight-scripts/releases)
+and unzip it on top of your existing folder (overwriting). Same result.
+
+Pinned versions are available at the same Releases page if you ever need to
+roll back.
 
 ## Per-file licensing
 
