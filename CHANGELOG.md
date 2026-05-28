@@ -5,6 +5,62 @@ All notable changes to this repository will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] — 2026-05-28
+
+### Fixed
+
+- **GAME.js** — v1.1.1 loaded but crashed at runtime with several issues
+  found by clicking through the UI. Root cause: the v1.0–v1.1.1 port
+  work had spot-read the V8 PJSR porting guide for specific topics
+  (class inheritance, `with` strict-mode, `View.viewById` null) but
+  hadn't audited it cover-to-cover. Reading the whole guide flushed
+  out the rest:
+  - **Misleading `Unexpected token '}' at line 502`** loading the
+    script — caused by backtick / em-dash / ellipsis characters in
+    my V8-port-note JS line comments. Either PI's preprocessor or
+    its V8 build mis-tokenises those characters even inside
+    `// …` line comments; replaced with plain ASCII.
+  - **`VectorGraphics is not defined`** when clicking the zoom
+    button — the `VectorGraphics` class was removed in V8; `Graphics`
+    handles all coordinate types now. One call site at
+    `PreviewControl.scrollbox.viewport.onPaint` rewritten.
+  - **`TextAlign.Center` is undefined** — the V8 host class is
+    `TextAlignment`, not `TextAlign`. Earlier mechanical rewrite of
+    `TextAlign_*` to `TextAlign.*` was wrong; corrected to
+    `TextAlignment.*`.
+  - **`Compression.ZLib` is undefined when used as enum** — the
+    `Compression` class itself still exists (still constructed with
+    `new Compression(...)`), but the algorithm enum moved to
+    `CompressionAlgorithm`. Two call sites fixed.
+  - **`gc(true)`** removed — deprecated no-op in V8.
+  - **`Graphics.fillPolygon(): signed integer value expected`** when
+    drawing multipoint figures — the V8 signature is
+    `fillPolygon(points, brush[, fillRule])` with brush 2nd, not
+    `(points, fillRule, brush)` as in legacy `VectorGraphics`. Five
+    call sites fixed (active + dead-code paths). One spurious
+    `radius` argument to `drawPolygon` also removed.
+  - **Compression API behavior change** — `Compression.compress()`
+    now returns an array of objects with `compressedData`,
+    `uncompressedSize: BigInt`, `checksum: BigInt` properties
+    (legacy: array of `[data, size, csum1, csum2]` arrays). The
+    mask-save pipeline (`subsToByteArray` / `byteArrayToSubs`)
+    rewritten for the new format; on-wire layout keeps a 16-byte
+    header by packing the BigInt checksum into two uint32s.
+- Audit method: against `/Applications/PixInsight/doc/pjsr/objects/Graphics/Graphics.html`
+  for Graphics method signatures, and against the porting guide for
+  every removed / renamed / behavior-changed API. All drawing-method
+  call sites (drawCircle, drawLine, drawRect, drawTextRect, fillRect,
+  fillCircle, strokeRect, …) verified against the canonical
+  signatures.
+
+### Note
+
+- A pre-existing UX quirk (not a V8 port bug): when zoomed out a long
+  way, multipoint anchor handles are visually small and can be tricky
+  to grab — the hit radius is `apDiameter` (default 15 image pixels),
+  so click misses can happen at low zoom. Workaround: zoom in before
+  grabbing, or raise *Size* in **Drawing Options**.
+
 ## [1.1.1] — 2026-05-28
 
 ### Fixed

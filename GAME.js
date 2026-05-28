@@ -64,13 +64,15 @@ movements of the whole area.
 CoreApplication.ensureMinimumVersion(1, 9, 4);
 
 // V8 PJSR port note:
-// All legacy `#include <pjsr/*.jsh>` directives have been removed. Under the
-// V8 runtime (PixInsight 1.9.4 "Lockhart" and later), the constants they
-// supplied are accessed directly on their host classes (StdButton.Yes,
-// FrameStyle.Box, TextAlign.Center, UndoFlag.NoSwapFile, SampleType.UInt8,
-// DataType.UInt32, ColorSpace.RGB, StdCursor.Cross, MouseButton.Left,
-// StdIcon.Warning, PenStyle.Solid, FontFamily.Helvetica, Compression.ZLib,
-// etc.). NumericControl, Slider, ColorComboBox are core UI classes.
+// All legacy pjsr jsh include directives have been removed. Under the
+// V8 runtime (PixInsight 1.9.4 Lockhart and later), the constants they
+// supplied are accessed directly on their host classes. Most just lost
+// the underscore (StdButton.Yes, FrameStyle.Box, UndoFlag.NoSwapFile,
+// MouseButton.Left, KeyModifier.Control, StdIcon.Warning, PenStyle.Solid,
+// StdCursor.Cross, FontFamily.Helvetica, ColorSpace.RGB), but a handful
+// changed host name: SampleType -> PixelSampleType, TextAlign ->
+// TextAlignment, Compression (the enum) -> CompressionAlgorithm.
+// NumericControl, Slider, ColorComboBox are core UI classes.
 
 #define ID 'GAME'
 #define TITLE "GAME - Interactive Galaxy Mask Editor - "
@@ -241,10 +243,10 @@ function maskData(view, callback)
       for (var i = 0; i < this.ellipsoids.length; i++)
       {
          { const __w = (this.ellipsoids[i]);
-            // V8 strict-mode rewrite of legacy `with`: the body had to
-            // both write to an outer var (`ellipsoids.push`) and read
-            // properties of the with-target (`x, y, a, b, pa`). The
-            // mechanical transformer can't disambiguate; manual fix.
+            // V8 strict-mode rewrite of legacy with-statement: the body
+            // had to both write to an outer var (ellipsoids.push) and
+            // read properties of the with-target (x, y, a, b, pa). The
+            // mechanical transformer cannot disambiguate; manual fix.
             ellipsoids.push({x: __w.x, y: __w.y, a: __w.a, b: __w.b, pa: __w.pa});
          }
       }
@@ -260,9 +262,9 @@ function maskData(view, callback)
          for (var i = 0; i < ellipsoids.length; i++)
          {
             { const __w = (ellipsoids[i]);
-               // V8 strict-mode rewrite of legacy `with`: x, y, a, b, pa
-               // here are properties of the with-target, not outer-scope
-               // vars. Manual fix; mechanical transformer can't tell.
+               // V8 strict-mode rewrite of legacy with-statement: x, y,
+               // a, b, pa here are properties of the with-target, not
+               // outer-scope vars. Manual fix; transformer cannot tell.
                this.addEllipsoid(__w.x, __w.y, __w.a, __w.b, __w.pa);
             }
          }
@@ -507,14 +509,12 @@ function maskData(view, callback)
  *
  * ****************************************************************************
  */
-// V8 PJSR port: legacy `this.__base__ = Dialog; this.__base__()` inheritance
-// no longer works under V8 (silent no-op; the porting guide mandates
-// `class extends Dialog`). Class bodies are implicit strict mode, where
-// `with` statements are SyntaxErrors — and this script uses 88 of them.
-// Workaround: a tiny ES6 class shell calls super() then trampolines to
-// this init function via `.call(this, …)`. The init function stays a
-// regular non-strict function declaration, so all `with` blocks remain
-// legal. Class declarations live at the bottom of the file.
+// V8 PJSR port: legacy this.__base__ inheritance no longer works under
+// V8 (silent no-op; the porting guide mandates class extends Dialog).
+// Class bodies are implicit strict mode where with-statements are
+// SyntaxErrors and this script uses many of them, so a tiny ES6 class
+// shell calls super() then trampolines to a non-strict init function
+// via .call(this, ...). Class declarations live at the bottom.
 function showDialog_init(cview, Id)
 {
    this.userResizable = true;
@@ -1408,7 +1408,7 @@ function showDialog_init(cview, Id)
             var r = new Rect(0, 0, w, this.height);
             g.fillRect(r, new Brush( Color.GREEN ));
             g.pen = new Pen(0xff000000);
-            g.drawTextRect(R, '*** please wait ***', TextAlign.Center);
+            g.drawTextRect(R, '*** please wait ***', TextAlignment.Center);
          }
          g.drawRect(R);
          g.end();
@@ -2500,7 +2500,7 @@ function multiPointFigure(imageBounds, caller)
             if (settings.bezier && this.polygon.length > 2)
             {
                var color = Transparent(0xffffffff, settings.transparency);
-               __w.fillPolygon(this.polygon, 0, new Brush(color));
+               __w.fillPolygon(this.polygon, new Brush(color));
             }
             //
             // + anker points
@@ -2555,9 +2555,9 @@ function multiPointFigure(imageBounds, caller)
                   tri.push(new Point(gx + radius, gy + radius));
 
                   if (settings.gpFilled)
-                     __w.fillPolygon(tri, 0, new Brush(__w.pen.color));
+                     __w.fillPolygon(tri, new Brush(__w.pen.color));
                   else
-                     __w.drawPolygon(tri, radius);
+                     __w.drawPolygon(tri);
                }
                else
                {
@@ -2690,12 +2690,12 @@ function multiPointFigure(imageBounds, caller)
       {
          if (this.polygon.length > 2)
          {
-            graphics.fillPolygon(this.polygon, 0, new Brush(0xffffffff));
+            graphics.fillPolygon(this.polygon, new Brush(0xffffffff));
          }
       }
       else
       {
-         if (this.points.length > 1) graphics.fillPolygon(this.points, 0, new Brush(0xffffffff));
+         if (this.points.length > 1) graphics.fillPolygon(this.points, new Brush(0xffffffff));
       }
    }
 
@@ -3711,7 +3711,7 @@ function PreviewControl_init(parent)
       this.zoom = newZoom;
       this.scaledImage = null;
       this.refPoint = refPoint;
-      gc(true);
+      // V8: gc() is deprecated and a no-op; rely on V8's automatic GC.
       if (this.zoom > 0)
       {
          this.scale = this.zoom;
@@ -3889,7 +3889,7 @@ function PreviewControl_init(parent)
    this.scrollbox.viewport.onPaint = function (x0, y0, x1, y1)
    {
       var preview = this.parent.parent;
-      var graphics = new VectorGraphics(this);
+      var graphics = new Graphics(this);
 
       graphics.fillRect(x0,y0, x1, y1, new Brush(0xff202020));
       var offsetX = this.parent.maxHorizontalScrollPosition>0 ? -this.parent.horizontalScrollPosition : (this.width-preview.scaledImage.width)/2;
@@ -5255,7 +5255,7 @@ function compressToSubs(string)
    var m = string.length + 132;
    var b = new ByteArray(string);
 
-   var compression =  new Compression(Compression.ZLib) ;
+   var compression = new Compression(CompressionAlgorithm.ZLib);
 
    while (b.length < m)
    {
@@ -5275,7 +5275,7 @@ function uncompressSubs(subs)
    //
    // uncompress from subs
    //
-   var compression  = new Compression(Compression.ZLib);
+   var compression = new Compression(CompressionAlgorithm.ZLib);
    var uByteArray = compression.uncompress (subs);
    var uncompressed = uByteArray.utf8ToString();
    return uncompressed.trim();   // remove blanks
@@ -5283,26 +5283,25 @@ function uncompressSubs(subs)
 
 function subsToByteArray(subs)
 {
-
+   // V8 PJSR: Compression.compress() now returns an array of objects with
+   //    { compressedData: ByteArray, uncompressedSize: BigInt, checksum: BigInt }
+   // (previously: array of arrays [compressedData, uncompressedSize, checksum1, checksum2]).
+   // We pack the BigInt checksum into 2 uint32s (low, high) so the on-wire
+   // layout stays a 16-byte header (4 uint32s) followed by compressedData.
    var stream = new ByteArray();
 
    for (var i = 0; i < subs.length; i++)
    {
-      var sub = subs[i];
-      //   struct Subblock
-      //   {
-      //      ByteArray compressedData;
-      //      size_type uncompressedSize = 0;
-      //      uint64    checksum         = 0;
-      //   };
-      var compressedData   = sub[0];   // object
-      var uncompressedSize = sub[1];   // number
-      var checksum1        = sub[2];   // number
-      var checksum2        = sub[3];   // number
+      var sub              = subs[i];
+      var compressedData   = sub.compressedData;
+      var uncompressedSize = Number(sub.uncompressedSize);  // BigInt -> Number
+      var checksum         = sub.checksum;                  // BigInt
+      var checksumLow      = Number(checksum & 0xFFFFFFFFn);
+      var checksumHigh     = Number((checksum >> 32n) & 0xFFFFFFFFn);
       var compressedLen    = compressedData.length;
-      var hdr = new Int32Array(4);
-      hdr[0] = checksum1;
-      hdr[1] = checksum2;
+      var hdr = new Uint32Array(4);
+      hdr[0] = checksumLow;
+      hdr[1] = checksumHigh;
       hdr[2] = uncompressedSize;
       hdr[3] = compressedLen;
       stream.add(new ByteArray(hdr));
@@ -5313,20 +5312,26 @@ function subsToByteArray(subs)
 
 function byteArrayToSubs(stream)
 {
+   // V8 PJSR: Compression.uncompress() now expects an array of objects
+   // matching the format produced by .compress() — see subsToByteArray above.
    var subs = [];
 
    var i = 0;
    while (i < stream.length)
    {
       var hdr = stream.toUint32Array(i, 16);
-      var checksum1        = hdr[0];
-      var checksum2        = hdr[1];
+      var checksumLow      = hdr[0];
+      var checksumHigh     = hdr[1];
       var uncompressedSize = hdr[2];
       var compressedLen    = hdr[3];
       i += 16;
       var compressedData   = new ByteArray(stream, i, compressedLen);
-      var sub = [compressedData, uncompressedSize, checksum1, checksum2];
-      subs.push(sub);
+      var checksum         = (BigInt(checksumHigh) << 32n) | BigInt(checksumLow);
+      subs.push({
+         compressedData:   compressedData,
+         uncompressedSize: BigInt(uncompressedSize),
+         checksum:         checksum
+      });
       i += compressedLen;
    }
    return subs;
@@ -5439,16 +5444,16 @@ function Transparent(color, transparency)
 // Legacy SpiderMonkey-era inheritance was set up via
 //     this.__base__ = Dialog; this.__base__();
 //     XXX.prototype = new Dialog;
-// which silently no-ops under V8. The V8 PJSR runtime only inherits from core
-// PixInsight classes (Dialog, Frame, …) when you use `class extends X` and call
-// `super()` from the constructor.
+// which silently no-ops under V8. The V8 PJSR runtime only inherits from
+// core PixInsight classes (Dialog, Frame, ...) when you use a class
+// extends X declaration and call super() from the constructor.
 //
-// However, ES6 class bodies are implicit strict mode, where `with` statements
-// are SyntaxErrors — and this script uses ~88 `with` blocks. To avoid touching
-// thousands of lines, each class shell below calls super() and then trampolines
-// to the original (renamed `*_init`) function via `.call(this, …)`. The init
-// functions remain non-strict regular function declarations, so all the
-// `with` blocks remain legal.
+// However, ES6 class bodies are implicit strict mode where with-statements
+// are SyntaxErrors -- and this script uses many with-blocks. To avoid
+// touching thousands of lines, each class shell below calls super() and
+// then trampolines to the original (renamed _init) function via
+// .call(this, ...). The init functions remain non-strict regular function
+// declarations, so the with-blocks remain legal.
 // =============================================================================
 
 class PreviewControl extends Frame {

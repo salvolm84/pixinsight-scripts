@@ -267,12 +267,11 @@ are identical to Hartmut's original. Only V8-required plumbing changed:
 PI menu entry: **Script ▸ salvolm ▸ GAME** (the original registered
 under `Utilities`; moved to match this repo's submenu convention).
 
-> **Note:** GAME has not yet been smoke-tested in PixInsight under V8.
-> The port is mechanical and syntax-validates cleanly with Node, but a
-> handful of constants (`MouseButton.*`, `KeyModifier.Control`) follow
-> the standard `Class.Member` convention without explicit documentation
-> in the official V8 porting guide. Please report any runtime issues
-> via the Issues tab — they are likely to be one-line fixes.
+> **Pre-existing UX quirk** (not a V8 port issue): when zoomed out a
+> long way, multipoint anchor handles are visually small and tricky to
+> grab — the hit radius is `apDiameter` (default 15 image pixels), so
+> click misses are possible at low zoom. Workaround: zoom in before
+> grabbing, or raise *Size* under **Drawing Options**.
 
 License: original GAME script is Copyright © 2017 Hartmut V. Bornemann
 (<hvb356@hotmail.de>). The V8 porting changes are released alongside
