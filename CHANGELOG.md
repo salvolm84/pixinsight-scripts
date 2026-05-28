@@ -5,6 +5,50 @@ All notable changes to this repository will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] — 2026-05-28
+
+### Fixed
+
+- **GAME.js** — v1.1.0 loaded with
+  `SyntaxError: Unexpected token '}'` at line 497. Root cause: V8 PJSR
+  parses `#engine v8` scripts in implicit strict mode, where `with`
+  statements are illegal — and the original GAME script used 88 of
+  them. The previous release tried to preserve the `with` blocks via a
+  trampoline pattern (init function called from inside an ES6 class
+  shell) on the theory that a non-strict regular function body could
+  contain them; that theory was wrong.
+- **All 88 `with (EXPR) { body }` blocks rewritten** to
+  `{ const __w = (EXPR); body }` with top-level body statements
+  prefixed by `__w.`. Mechanical transformation, with a non-strict
+  helper for the bulk of the work plus targeted manual fixes for ~11
+  blocks where the legacy `with` was reading properties of the
+  with-target inside nested expressions / closures / call arguments:
+  - `with (this.ellipsoids[i])` and `with (ellipsoids[i])` in dead
+    `getEllipsoidsObject` / `setEllipsoidsObject` helpers — properties
+    read as object-literal values / call args.
+  - `with (this.refList)` — `remove(v)` inside a nested `for` loop.
+  - `with (this.progressBar)` — bare `height` inside `onPaint`.
+  - `with (this)` (the dialog) — two bare `done(1)` inside
+    `onKeyPress` event handlers.
+  - `with (graphics)` in `multiPointFigure.draw` — 23 broken graphics
+    method calls (`fillPolygon`, `drawCircle`, `drawLine`, …) and
+    `pen = new Pen(…)` assignments scattered inside nested
+    `if`/`for` blocks.
+  - `with (this.colorBox)` / `with (this.editBox)` /
+    `with (this.checkButton)` — `visible`, `text`, `currentColor()`
+    references inside `onColorSelected` / `onEditCompleted` /
+    `onCheck` / `onLeave` handlers (rewritten using `this`, which
+    PJSR binds to the control inside the handler).
+  - `with (this.tbx)` — bare `numberOfChildren`, `nodeRect`, `child`
+    inside a `setMinHeight()` call.
+  - 8 nested `with (sizer)` blocks where the outer `sizer` was a
+    property of the with-target rather than a `var` — rewritten using
+    a separate `const __sz = __w.sizer;` alias to avoid `__w`
+    shadowing.
+- Validated under strict-mode parsing with Node. Still **not yet
+  smoke-tested in PixInsight** — please re-test and report any
+  remaining issues.
+
 ## [1.1.0] — 2026-05-28
 
 ### Added

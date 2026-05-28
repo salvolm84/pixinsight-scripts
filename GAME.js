@@ -240,9 +240,12 @@ function maskData(view, callback)
       var ellipsoids = [];
       for (var i = 0; i < this.ellipsoids.length; i++)
       {
-         with (this.ellipsoids[i])
-         {
-            ellipsoids.push({x:x, y:y, a:a, b:b, pa:pa});
+         { const __w = (this.ellipsoids[i]);
+            // V8 strict-mode rewrite of legacy `with`: the body had to
+            // both write to an outer var (`ellipsoids.push`) and read
+            // properties of the with-target (`x, y, a, b, pa`). The
+            // mechanical transformer can't disambiguate; manual fix.
+            ellipsoids.push({x: __w.x, y: __w.y, a: __w.a, b: __w.b, pa: __w.pa});
          }
       }
       return JSON.stringify(ellipsoids);
@@ -256,9 +259,11 @@ function maskData(view, callback)
          var ellipsoids = JSON.parse(jsonString);
          for (var i = 0; i < ellipsoids.length; i++)
          {
-            with (ellipsoids[i])
-            {
-               this.addEllipsoid(x, y, a, b, pa);
+            { const __w = (ellipsoids[i]);
+               // V8 strict-mode rewrite of legacy `with`: x, y, a, b, pa
+               // here are properties of the with-target, not outer-scope
+               // vars. Manual fix; mechanical transformer can't tell.
+               this.addEllipsoid(__w.x, __w.y, __w.a, __w.b, __w.pa);
             }
          }
       }
@@ -563,12 +568,11 @@ function showDialog_init(cview, Id)
    data.setSettings(settings);
 
    this.maximizeButton = new ToolButton(this);
-   with (this.maximizeButton)
-   {
-      visible = primaryScreen.width > 0 && primaryScreen.height > 0;
-      icon = ':/icons/window.png';
+   { const __w = (this.maximizeButton);
+      __w.visible = primaryScreen.width > 0 && primaryScreen.height > 0;
+      __w.icon = ':/icons/window.png';
 
-      onClick = function(checked)
+      __w.onClick = function(checked)
       {
          maximized = !maximized;
 
@@ -838,12 +842,10 @@ function showDialog_init(cview, Id)
    // this canvas for graphs and image display
 
    this.canvas = new Frame(this);
-   with (this.canvas)
-   {
-      sizer = new VerticalSizer;
-      with ( sizer )
-      {
-         add( this.previewControl );
+   { const __w = (this.canvas);
+      __w.sizer = new VerticalSizer;
+      { const __sz = __w.sizer;
+         __sz.add( this.previewControl );
       }
    }
 
@@ -854,38 +856,35 @@ function showDialog_init(cview, Id)
    // my ©
 
    this.lblCopyright = new Label(this)
-   with (this.lblCopyright)
-   {
-      text = "© 2017, Hartmut V. Bornemann";
+   { const __w = (this.lblCopyright);
+      __w.text = "© 2017, Hartmut V. Bornemann";
    }
    //
    // reference mask
    //
    this.lblMask = new Label(this)
-   with (this.lblMask)
-   {
-      useRichText = true;
-      text = "<b>Import old mask</b>";
-      toolTip = "Select an old mask and import all figures, saved with this script before";
+   { const __w = (this.lblMask);
+      __w.useRichText = true;
+      __w.text = "<b>Import old mask</b>";
+      __w.toolTip = "Select an old mask and import all figures, saved with this script before";
 
-      visible = false;
+      __w.visible = false;
    }
    //
    // this button loads the recent created mask
    //
    this.btnRecent = new PushButton( this );
-   with (this.btnRecent)
-   {
-      defaultButton = false;
-      text = "load recently created figures";
+   { const __w = (this.btnRecent);
+      __w.defaultButton = false;
+      __w.text = "load recently created figures";
       var old_ellipsoids = readEllipsoids(dialog.view);   // version 1.4
       var storedFigures = dialog.view.propertyValue('figures');// version 1.5
-      enabled = old_ellipsoids.length > 0 || storedFigures != null;
-      icon = this.scaledResource(":/icons/document-open.png");
+      __w.enabled = old_ellipsoids.length > 0 || storedFigures != null;
+      __w.icon = this.scaledResource(":/icons/document-open.png");
 
-      visible = false;
+      __w.visible = false;
 
-      onClick = function()
+      __w.onClick = function()
       {
          // new procedure
          //
@@ -902,13 +901,12 @@ function showDialog_init(cview, Id)
    //
    //
    this.btnOptions = new ToolButton( this );
-   with (this.btnOptions)
-   {
-      icon =  this.scaledResource(':/toolbar/view-process-explorer.png');
-      text = 'Options';
-      toolTip = 'Edit drawing options';
+   { const __w = (this.btnOptions);
+      __w.icon =  this.scaledResource(':/toolbar/view-process-explorer.png');
+      __w.text = 'Options';
+      __w.toolTip = 'Edit drawing options';
 
-      onClick = function ( checked )
+      __w.onClick = function ( checked )
       {
          var dlgOptions = new showOptions(JSON.stringify(settings));
          dlgOptions.execute();
@@ -919,24 +917,22 @@ function showDialog_init(cview, Id)
       }
    }
    this.optionsButtonFrame = new Frame(this);
-   with (this.optionsButtonFrame)
-   {
-      sizer = new HorizontalSizer();
-      sizer.margin = 4;
-      sizer.add(this.btnOptions);
-      sizer.addStretch();
+   { const __w = (this.optionsButtonFrame);
+      __w.sizer = new HorizontalSizer();
+      __w.sizer.margin = 4;
+      __w.sizer.add(this.btnOptions);
+      __w.sizer.addStretch();
    }
    //
    //
    //
    this.refList = new ViewList( this );
-   with (this.refList)
-   {
+   { const __w = (this.refList);
       //
       // fill the list
       //
-      getMainViews();
-      currentView  = dialog.view;
+      __w.getMainViews();
+      __w.currentView  = dialog.view;
       //
       // remove non-mask views
       //
@@ -958,7 +954,7 @@ function showDialog_init(cview, Id)
                   break;
                }
             }
-            if (!isMask) remove(v);
+            if (!isMask) __w.remove(v);
          }
 
       }
@@ -971,7 +967,7 @@ function showDialog_init(cview, Id)
          this.btnRecent.enabled = this.btnRecent.enabled || eStr != null;
       }
 
-      onViewSelected = function( view )
+      __w.onViewSelected = function( view )
       {
          // select another view
          if (view.isNull)
@@ -1002,21 +998,19 @@ function showDialog_init(cview, Id)
    // add / delete ellipsoids
    //
    this.lblAddDeletions = new Label(this)
-   with (this.lblAddDeletions)
-   {
-      useRichText = true;
-      text = "<b>Add and delete ellipsoids</>";
+   { const __w = (this.lblAddDeletions);
+      __w.useRichText = true;
+      __w.text = "<b>Add and delete ellipsoids</>";
    }
    //
    // add button
    //
    this.add = new PushButton( this );
-   with (this.add)
-   {
-      defaultButton = false;
-      text = "add";
-      icon = this.scaledResource( ":/icons/add.png");
-      onClick = function()
+   { const __w = (this.add);
+      __w.defaultButton = false;
+      __w.text = "add";
+      __w.icon = this.scaledResource( ":/icons/add.png");
+      __w.onClick = function()
       {
          dialog.add.defaultButton = false;
          //
@@ -1031,14 +1025,13 @@ function showDialog_init(cview, Id)
    // ellipsoid parameter controls
 
    this.x = new NumericEdit(this);
-   with (this.x)
-   {
-      label.text = "x:";
-      setPrecision( 0 );
-      setRange( 0, 99999 );
-      setValue( 0 );
-      toolTip = "<p>X-origin of the ellipsoid.</p>";
-      onValueUpdated = function( value )
+   { const __w = (this.x);
+      __w.label.text = "x:";
+      __w.setPrecision( 0 );
+      __w.setRange( 0, 99999 );
+      __w.setValue( 0 );
+      __w.toolTip = "<p>X-origin of the ellipsoid.</p>";
+      __w.onValueUpdated = function( value )
       {
          var e = data.getEllipsoid();
          if (e == null) return;
@@ -1048,14 +1041,13 @@ function showDialog_init(cview, Id)
    }
 
    this.y = new NumericEdit(this);
-   with (this.y)
-   {
-      label.text = "y:";
-      setPrecision( 0 );
-      setRange( 0, 99999 );
-      setValue( 0 );
-      toolTip = "<p>Y-origin of the ellipsoid.</p>";
-      onValueUpdated = function( value )
+   { const __w = (this.y);
+      __w.label.text = "y:";
+      __w.setPrecision( 0 );
+      __w.setRange( 0, 99999 );
+      __w.setValue( 0 );
+      __w.toolTip = "<p>Y-origin of the ellipsoid.</p>";
+      __w.onValueUpdated = function( value )
       {
          var e = data.getEllipsoid();
          if (e == null) return;
@@ -1065,14 +1057,13 @@ function showDialog_init(cview, Id)
    }
 
    this.a = new NumericEdit(this);
-   with (this.a)
-   {
-      label.text = "a:";
-      setPrecision( 0 );
-      setRange( 0, 99999 );
-      setValue( 0 );
-      toolTip = "<p>Length of the 1st radius of the ellipsoid.</p>";
-      onValueUpdated = function( value )
+   { const __w = (this.a);
+      __w.label.text = "a:";
+      __w.setPrecision( 0 );
+      __w.setRange( 0, 99999 );
+      __w.setValue( 0 );
+      __w.toolTip = "<p>Length of the 1st radius of the ellipsoid.</p>";
+      __w.onValueUpdated = function( value )
       {
          var e = data.getEllipsoid();
          if (e == null) return;
@@ -1082,14 +1073,13 @@ function showDialog_init(cview, Id)
    }
 
    this.b = new NumericEdit(this);
-   with (this.b)
-   {
-      label.text = "b:";
-      setPrecision( 0 );
-      setRange( 0, 99999 );
-      setValue( 0 );
-      toolTip = "<p>Length of the 2nd radius of the ellipsoid.</p>";
-      onValueUpdated = function( value )
+   { const __w = (this.b);
+      __w.label.text = "b:";
+      __w.setPrecision( 0 );
+      __w.setRange( 0, 99999 );
+      __w.setValue( 0 );
+      __w.toolTip = "<p>Length of the 2nd radius of the ellipsoid.</p>";
+      __w.onValueUpdated = function( value )
       {
          var e = data.getEllipsoid();
          if (e == null) return;
@@ -1099,22 +1089,21 @@ function showDialog_init(cview, Id)
    }
 
    this.pa = new NumericEdit(this);
-   with (this.pa)
-   {
-      label.text = "pa:";
-      setPrecision( 2 );
-      setRange( -180, 180 );
-      setValue( 0 );
-      toolTip = "<p>The point transformtion angle of the ellipsoid in degrees." +
+   { const __w = (this.pa);
+      __w.label.text = "pa:";
+      __w.setPrecision( 2 );
+      __w.setRange( -180, 180 );
+      __w.setValue( 0 );
+      __w.toolTip = "<p>The point transformtion angle of the ellipsoid in degrees." +
                   " Use the mouse wheel here for rotation</p>";
-      onValueUpdated = function( value )
+      __w.onValueUpdated = function( value )
       {
          var e = data.getEllipsoid();
          if (e == null) return;
          e.setPa( value );
       }
 
-      onMouseWheel = function( x, y, delta, buttonState, modifiers )
+      __w.onMouseWheel = function( x, y, delta, buttonState, modifiers )
       {
          var incr = 1;
          var e = data.getEllipsoid();
@@ -1135,20 +1124,18 @@ function showDialog_init(cview, Id)
    }
 
    this.lblIndex = new Label(this)
-   with (this.lblIndex)
-   {
-      text = "Ellipsoid#";
-      toolTip = "<p>Index of the current ellipsoid.</p>";
+   { const __w = (this.lblIndex);
+      __w.text = "Ellipsoid#";
+      __w.toolTip = "<p>Index of the current ellipsoid.</p>";
    }
 
    this.del = new PushButton( this );
-   with (this.del)
-   {
-      defaultButton = false;
-      text = "delete";
-      enabled = false;
-      icon = this.scaledResource( ":/icons/delete.png");
-      onClick = function()
+   { const __w = (this.del);
+      __w.defaultButton = false;
+      __w.text = "delete";
+      __w.enabled = false;
+      __w.icon = this.scaledResource( ":/icons/delete.png");
+      __w.onClick = function()
       {
          data.deleteEllipsoid();
          dialog.previewControl.repaint();
@@ -1157,30 +1144,28 @@ function showDialog_init(cview, Id)
    }
 
    this.ellipsPage = new Frame ( this );
-   with( this.ellipsPage )
-   {
-      sizer = new VerticalSizer();
-      with (sizer)
-      {
-         margin = 4;
-         add( this.lblAddDeletions );
-         addSpacing(4);
-         add( this.add );
-         addSpacing(4);
-         add( this.x );
-         addSpacing(4);
-         add( this.y );
-         addSpacing(4);
-         add( this.a );
-         addSpacing(4);
-         add( this.b );
-         addSpacing(4);
-         add( this.pa );
+   { const __w = (this.ellipsPage);
+      __w.sizer = new VerticalSizer();
+      { const __sz = __w.sizer;
+         __sz.margin = 4;
+         __sz.add( this.lblAddDeletions );
+         __sz.addSpacing(4);
+         __sz.add( this.add );
+         __sz.addSpacing(4);
+         __sz.add( this.x );
+         __sz.addSpacing(4);
+         __sz.add( this.y );
+         __sz.addSpacing(4);
+         __sz.add( this.a );
+         __sz.addSpacing(4);
+         __sz.add( this.b );
+         __sz.addSpacing(4);
+         __sz.add( this.pa );
          //addSpacing(4);
-         addStretch();
-         add( this.lblIndex );
-         addSpacing(4);
-         add( this.del );
+         __sz.addStretch();
+         __sz.add( this.lblIndex );
+         __sz.addSpacing(4);
+         __sz.add( this.del );
       }
    }
 
@@ -1188,21 +1173,19 @@ function showDialog_init(cview, Id)
    // add / delete multipoint curves
    //
    this.lblAddDeletMP = new Label(this)
-   with (this.lblAddDeletMP)
-   {
-      useRichText = true;
-      text = "<b>Add and delete multi point</>";
+   { const __w = (this.lblAddDeletMP);
+      __w.useRichText = true;
+      __w.text = "<b>Add and delete multi point</>";
    }
    //
    // add button
    //
    this.addMP = new PushButton( this );
-   with (this.addMP)
-   {
-      defaultButton = false;
-      text = "add";
-      icon = this.scaledResource( ":/icons/add.png");
-      onClick = function()
+   { const __w = (this.addMP);
+      __w.defaultButton = false;
+      __w.text = "add";
+      __w.icon = this.scaledResource( ":/icons/add.png");
+      __w.onClick = function()
       {
          dialog.addMP.defaultButton = false;
          //
@@ -1218,13 +1201,12 @@ function showDialog_init(cview, Id)
    }
 
    this.helpCurved = new TextBox(this);
-   with (this.helpCurved)
-   {
-      frameStyle = FrameStyle.Box;
-      readOnly   = true;
-      setScaledMinHeight(160);
+   { const __w = (this.helpCurved);
+      __w.frameStyle = FrameStyle.Box;
+      __w.readOnly   = true;
+      __w.setScaledMinHeight(160);
 
-      text = '<b>Curve editing</b><br>' +
+      __w.text = '<b>Curve editing</b><br>' +
              ' - append: click 3 points<br>' +
              ' - insert: click near contour<br>' +
              ' - remove: right click point<br>' +
@@ -1235,30 +1217,27 @@ function showDialog_init(cview, Id)
    }
 
    this.lblPointInfo = new Label(this)
-   with (this.lblPointInfo)
-   {
-      backgroundColor = 0xff00ffff;
-      foregroundColor = 0xff000000;
-      useRichText = true;
-      text = "<b>Click 1st point of line</>";
-      visible = false;
+   { const __w = (this.lblPointInfo);
+      __w.backgroundColor = 0xff00ffff;
+      __w.foregroundColor = 0xff000000;
+      __w.useRichText = true;
+      __w.text = "<b>Click 1st point of line</>";
+      __w.visible = false;
    }
 
    this.lblIndexMP = new Label(this)
-   with (this.lblIndexMP)
-   {
-      text = "Curve#";
-      toolTip = "<p>Index of the current multipoint curve.</p>";
+   { const __w = (this.lblIndexMP);
+      __w.text = "Curve#";
+      __w.toolTip = "<p>Index of the current multipoint curve.</p>";
    }
 
    this.delMP = new PushButton( this );
-   with (this.delMP)
-   {
-      defaultButton = false;
-      text = "delete";
-      enabled = false;
-      icon = this.scaledResource( ":/icons/delete.png");
-      onClick = function()
+   { const __w = (this.delMP);
+      __w.defaultButton = false;
+      __w.text = "delete";
+      __w.enabled = false;
+      __w.icon = this.scaledResource( ":/icons/delete.png");
+      __w.onClick = function()
       {
          data.deleteMP();
          dialog.delMP.enabled = data.multiPoints.length > 0;
@@ -1271,34 +1250,31 @@ function showDialog_init(cview, Id)
 
 
    this.multiPointPage = new Frame( this );
-   with ( this.multiPointPage )
-   {
-      sizer = new VerticalSizer();
-      with (sizer)
-      {
-         margin = 4;
-         add(this.lblAddDeletMP);
-         addSpacing(4);
-         add(this.addMP);
-         addSpacing(4);
-         add(this.helpCurved);
-         addSpacing(8);
-         add(this.lblPointInfo);
-         addStretch();
-         add(this.lblIndexMP);
-         addSpacing(4);
-         add(this.delMP);
+   { const __w = (this.multiPointPage);
+      __w.sizer = new VerticalSizer();
+      { const __sz = __w.sizer;
+         __sz.margin = 4;
+         __sz.add(this.lblAddDeletMP);
+         __sz.addSpacing(4);
+         __sz.add(this.addMP);
+         __sz.addSpacing(4);
+         __sz.add(this.helpCurved);
+         __sz.addSpacing(8);
+         __sz.add(this.lblPointInfo);
+         __sz.addStretch();
+         __sz.add(this.lblIndexMP);
+         __sz.addSpacing(4);
+         __sz.add(this.delMP);
       }
    }
 
    this.tabControl = new TabBox(this);
-   with (this.tabControl)
-   {
-      addPage(this.ellipsPage, 'Ellipses' );
-      addPage(this.multiPointPage, 'Multi point' );
-      currentPageIndex = 0;
+   { const __w = (this.tabControl);
+      __w.addPage(this.ellipsPage, 'Ellipses' );
+      __w.addPage(this.multiPointPage, 'Multi point' );
+      __w.currentPageIndex = 0;
 
-      onPageSelected = function ( pageIndex )
+      __w.onPageSelected = function ( pageIndex )
       {
          data.setObjectType(pageIndex);
          dialog.previewControl.repaint();
@@ -1309,69 +1285,61 @@ function showDialog_init(cview, Id)
    // mask exportations
    //
    this.lblExportations = new Label(this)
-   with (this.lblExportations)
-   {
-      useRichText = true;
-      text = "<b>Export Masks:</b>";
+   { const __w = (this.lblExportations);
+      __w.useRichText = true;
+      __w.text = "<b>Export Masks:</b>";
    }
 
    this.cbGradientMask = new CheckBox( this );
-   with (this.cbGradientMask)
-   {
-      checked = true;
-      text = "Gradient Mask";
+   { const __w = (this.cbGradientMask);
+      __w.checked = true;
+      __w.text = "Gradient Mask";
    }
    //
    // mask with light protection (optional)
    //
    this.cbLightMask = new CheckBox( this );
-   with (this.cbLightMask)
-   {
-      text = "Luminance Mask";
+   { const __w = (this.cbLightMask);
+      __w.text = "Luminance Mask";
    }
    //
    // mask without gradient (optional)
    //
    this.cbPlainMask = new CheckBox( this );
-   with (this.cbPlainMask)
-   {
-      text = "Binary Mask";
+   { const __w = (this.cbPlainMask);
+      __w.text = "Binary Mask";
    }
    //
    // mask with Edge gradient (optional)
    //
    this.cbGradientEdgeMask = new CheckBox( this );
-   with (this.cbGradientEdgeMask)
-   {
-      text = "Gradient Edge Mask";
+   { const __w = (this.cbGradientEdgeMask);
+      __w.text = "Gradient Edge Mask";
    }
 
    //
    // mask ...$T * $M rescaled (optional)
    //
    this.cbBrightnessMask = new CheckBox( this );
-   with (this.cbBrightnessMask)
-   {
-      text = "Brightness Mask";
+   { const __w = (this.cbBrightnessMask);
+      __w.text = "Brightness Mask";
    }
    //
    // mask ...$T * $M rescaled (optional)
    //
    this.cbStarMask = new CheckBox( this );
-   with (this.cbStarMask)
-   {
-      text = "Star Mask";
+   { const __w = (this.cbStarMask);
+      __w.text = "Star Mask";
    }
 
    this.btnSelectiveRejection = new PushButton(this);
-   with (this.btnSelectiveRejection)
-   {
-      enabled = false;
-      text ="Write shapes to Files/Views";
-      toolTip = 'Paint the binary mask(s) into files and / or views.\n' +
+   { const __w = (this.btnSelectiveRejection);
+      __w.enabled = false;
+      __w.text ="Write shapes to Files/Views";
+      __w.toolTip = 'Paint the binary mask(s) into files and / or views.\n' +
             'A new appendix \'_sr\' is added to filenames.';
 
-      onClick = function()
+      __w.onClick = function()
       {
          var srd = new showSelectiveRejection(data);
          srd.execute();
@@ -1379,19 +1347,17 @@ function showDialog_init(cview, Id)
    }
 
    this.lblCreate = new Label(this)
-   with (this.lblCreate)
-   {
-      useRichText = true;
-      text = "<b>Create and exit</b>";
+   { const __w = (this.lblCreate);
+      __w.useRichText = true;
+      __w.text = "<b>Create and exit</b>";
    }
 
    this.okButton = new PushButton( this );
-   with (this.okButton)
-   {
-      defaultButton = false;
-      text = "OK";
-      icon = this.scaledResource( ":/icons/ok.png" );
-      onClick = function()
+   { const __w = (this.okButton);
+      __w.defaultButton = false;
+      __w.text = "OK";
+      __w.icon = this.scaledResource( ":/icons/ok.png" );
+      __w.onClick = function()
       {
          //
          // save ellipsiods in mainView
@@ -1420,11 +1386,10 @@ function showDialog_init(cview, Id)
    }
 
    this.progressBar = new Frame(this)
-   with (this.progressBar)
-   {
-      setFixedHeight(15);
+   { const __w = (this.progressBar);
+      __w.setFixedHeight(15);
 
-      onPaint   = function( x0, y0, x1, y1 )
+      __w.onPaint   = function( x0, y0, x1, y1 )
       {
          var R = new Rect( x0, y0, x1, y1 );
 
@@ -1440,7 +1405,7 @@ function showDialog_init(cview, Id)
             var clear = new Brush( Color.WHITE );
             g.fillRect( R, clear );
             var w = dialog.progress * R.width * 0.01;
-            var r = new Rect(0, 0, w, height);
+            var r = new Rect(0, 0, w, this.height);
             g.fillRect(r, new Brush( Color.GREEN ));
             g.pen = new Pen(0xff000000);
             g.drawTextRect(R, '*** please wait ***', TextAlign.Center);
@@ -1449,131 +1414,119 @@ function showDialog_init(cview, Id)
          g.end();
       }
 
-      onResize = function(wNew, hNew, wOld, hOld)
+      __w.onResize = function(wNew, hNew, wOld, hOld)
       {
          this.repaint();
       }
    }
 
    this.topLeft = new Frame(this);
-   with (this.topLeft)
-   {
-      sizer = new VerticalSizer();
-      with (sizer)
-      {
-         margin = 4;
-         add( this.refList );
+   { const __w = (this.topLeft);
+      __w.sizer = new VerticalSizer();
+      { const __sz = __w.sizer;
+         __sz.margin = 4;
+         __sz.add( this.refList );
          /*addSpacing(16);
          add( this.lblMask );
          addSpacing(4);
          add( this.btnRecent );*/
-         addSpacing(4);
-         add(this.optionsButtonFrame);
+         __sz.addSpacing(4);
+         __sz.add(this.optionsButtonFrame);
       }
    }
 
    this.midLeft1 = new Frame(this);
-   with (this.midLeft1)
-   {
-      sizer = new VerticalSizer();
-      with (sizer)
-      {
-         margin = 4;
-         add(this.tabControl);
+   { const __w = (this.midLeft1);
+      __w.sizer = new VerticalSizer();
+      { const __sz = __w.sizer;
+         __sz.margin = 4;
+         __sz.add(this.tabControl);
       }
    }
 
    this.midLeft2 = new Frame(this);
-   with (this.midLeft2)
-   {
-      sizer = new VerticalSizer();
-      with (sizer)
-      {
-         margin = 4;
-         add( this.lblExportations );
-         addSpacing(4);
-         add( this.cbLightMask );
-         addSpacing(4);
-         add( this.cbGradientMask );
-         addSpacing(4);
-         add( this.cbGradientEdgeMask );
-         addSpacing(4);
-         add( this.cbPlainMask );
-         addSpacing(4);
-         add( this.cbBrightnessMask );
-         addSpacing(4);
-         add( this.cbStarMask );
+   { const __w = (this.midLeft2);
+      __w.sizer = new VerticalSizer();
+      { const __sz = __w.sizer;
+         __sz.margin = 4;
+         __sz.add( this.lblExportations );
+         __sz.addSpacing(4);
+         __sz.add( this.cbLightMask );
+         __sz.addSpacing(4);
+         __sz.add( this.cbGradientMask );
+         __sz.addSpacing(4);
+         __sz.add( this.cbGradientEdgeMask );
+         __sz.addSpacing(4);
+         __sz.add( this.cbPlainMask );
+         __sz.addSpacing(4);
+         __sz.add( this.cbBrightnessMask );
+         __sz.addSpacing(4);
+         __sz.add( this.cbStarMask );
       }
    }
 
    this.botLeft = new Frame(this);
-   with (this.botLeft)
-   {
+   { const __w = (this.botLeft);
 
-      setVariableSize();
+      __w.setVariableSize();
 
-      sizer = new VerticalSizer();
+      __w.sizer = new VerticalSizer();
 
-      with (sizer)
-      {
-         margin = 4;
-         add( this.btnSelectiveRejection );
-         addSpacing(8);
-         add( this.lblCreate );
-         addSpacing(4);
-         add( this.okButton );
-         addSpacing(4);//addStretch();
-         add( this.progressBar );
-         addSpacing(4);
-         add( this.lblCopyright );
-         addStretch();
+      { const __sz = __w.sizer;
+         __sz.margin = 4;
+         __sz.add( this.btnSelectiveRejection );
+         __sz.addSpacing(8);
+         __sz.add( this.lblCreate );
+         __sz.addSpacing(4);
+         __sz.add( this.okButton );
+         __sz.addSpacing(4);//addStretch();
+         __sz.add( this.progressBar );
+         __sz.addSpacing(4);
+         __sz.add( this.lblCopyright );
+         __sz.addStretch();
       }
 
-      adjustToContents();
+      __w.adjustToContents();
    }
 
    this.navi = new Frame(this);
-   with (this.navi)
-   {
-      backgroundColor = 0xFFF0F0F0 ;
-      setScaledMaxWidth(220);
-      sizer = new VerticalSizer();
-      with (sizer)
-      {
-         margin = 4;
-         add(this.topLeft);
-         add(this.midLeft1);
-         add(this.midLeft2);
-         addStretch();
+   { const __w = (this.navi);
+      __w.backgroundColor = 0xFFF0F0F0 ;
+      __w.setScaledMaxWidth(220);
+      __w.sizer = new VerticalSizer();
+      { const __sz = __w.sizer;
+         __sz.margin = 4;
+         __sz.add(this.topLeft);
+         __sz.add(this.midLeft1);
+         __sz.add(this.midLeft2);
+         __sz.addStretch();
  //        add( this.progressBar );
-         add(this.botLeft);
+         __sz.add(this.botLeft);
       }
    }
 
 
    this.sizer = new HorizontalSizer;
-   with (this.sizer)
-   {
-      spacing = 4;
-      add( this.navi );
-      add( this.canvas );
+   { const __w = (this.sizer);
+      __w.spacing = 4;
+      __w.add( this.navi );
+      __w.add( this.canvas );
    }
 
-   with (this)
-   {
-      setScaledMinSize(1000, 750);
+   { const __w = (this);
+      __w.setScaledMinSize(1000, 750);
 
-      onResize = function(wNew, hNew, wOld, hOld )
+      __w.onResize = function(wNew, hNew, wOld, hOld )
       {
          dialog.navi.repaint();
       }
 
-      onKeyPress = function(k, m)
+      __w.onKeyPress = function(k, m)
       {
          // Ctrl+C <= k == 67 & m == 2
          if (k == 67 & m == 2)
          {
-            done(1);
+            this.done(1);
          }
          else if (k == 27)
          {
@@ -1593,7 +1546,7 @@ function showDialog_init(cview, Id)
                                 dialog.cbGradientEdgeMask.checked);
                }
             }
-            done(1);
+            this.done(1);
          }
       }
    }
@@ -2513,8 +2466,7 @@ function multiPointFigure(imageBounds, caller)
 
    this.draw = function (graphics)
    {
-      with (graphics)
-      {
+      { const __w = (graphics);
          //var radius = settings.apDiameter / 2;
          //######################### zoom added 09/03/2024:
          var zoom = caller.dialog.previewControl.scale; //
@@ -2548,24 +2500,24 @@ function multiPointFigure(imageBounds, caller)
             if (settings.bezier && this.polygon.length > 2)
             {
                var color = Transparent(0xffffffff, settings.transparency);
-               fillPolygon(this.polygon, 0, new Brush(color));
+               __w.fillPolygon(this.polygon, 0, new Brush(color));
             }
             //
             // + anker points
             //
             if (this.points.length > 0)
             {
-               pen = new Pen( lineColor, 0, lineStyle );
+               __w.pen = new Pen( lineColor, 0, lineStyle );
                if (settings.bezier)
                {
-                  drawPolygon(this.polygon);
-                  pen = new Pen(0xe0ffffff, 0);
-                  drawPolygon(this.points);
+                  __w.drawPolygon(this.polygon);
+                  __w.pen = new Pen(0xe0ffffff, 0);
+                  __w.drawPolygon(this.points);
                }
                else
-                  drawPolygon(this.points);
+                  __w.drawPolygon(this.points);
 
-               pen = new Pen(lineColor, 1);           // intermediate points
+               __w.pen = new Pen(lineColor, 1);           // intermediate points
                for (var i = 0; i < this.points.length; i++)
                {
                   var p = this.points[i];
@@ -2573,9 +2525,9 @@ function multiPointFigure(imageBounds, caller)
                   var y = p.y;
 
                   if (settings.apFilled)
-                     fillCircle(x, y, radius, new Brush(pen.color));
+                     __w.fillCircle(x, y, radius, new Brush(__w.pen.color));
                   else
-                     drawCircle(x, y, radius);
+                     __w.drawCircle(x, y, radius);
                }
             }
             //
@@ -2589,7 +2541,7 @@ function multiPointFigure(imageBounds, caller)
                var gx = this.gradientCenter.x;
                var gy = this.gradientCenter.y;
 
-               pen = new Pen( gradientCenterColor );
+               __w.pen = new Pen( gradientCenterColor );
                //####################### radius = settings.gpDiameter / 2;
 
                if (settings.gpStyle)
@@ -2603,9 +2555,9 @@ function multiPointFigure(imageBounds, caller)
                   tri.push(new Point(gx + radius, gy + radius));
 
                   if (settings.gpFilled)
-                     fillPolygon(tri, 0, new Brush(pen.color));
+                     __w.fillPolygon(tri, 0, new Brush(__w.pen.color));
                   else
-                     drawPolygon(tri, radius);
+                     __w.drawPolygon(tri, radius);
                }
                else
                {
@@ -2613,12 +2565,12 @@ function multiPointFigure(imageBounds, caller)
                   // circle
                   //
                   if (settings.gpFilled)
-                     fillCircle(this.gradientCenter, radius, new Brush(pen.color));
+                     __w.fillCircle(this.gradientCenter, radius, new Brush(__w.pen.color));
                   else
-                     drawCircle(this.gradientCenter, radius);
+                     __w.drawCircle(this.gradientCenter, radius);
                   var z = settings.apDiameter * 0.75;
-                  drawLine(gx - z, gy, gx + z, gy);
-                  drawLine(gx, gy - z, gx, gy + z);
+                  __w.drawLine(gx - z, gy, gx + z, gy);
+                  __w.drawLine(gx, gy - z, gx, gy + z);
                }
                //
                // draw centroid
@@ -2627,21 +2579,21 @@ function multiPointFigure(imageBounds, caller)
                gx = this.centroid.x;
                gy = this.centroid.y;
 
-               pen = new Pen( centerColor );
+               __w.pen = new Pen( centerColor );
 
                if (settings.cpStyle)
                {
                   if (settings.cpFilled)
-                     fillRect(gx - radius, gy - radius, gx + radius, gy + radius, new Brush(pen.color));
+                     __w.fillRect(gx - radius, gy - radius, gx + radius, gy + radius, new Brush(__w.pen.color));
                   else
-                     drawRect(gx - radius, gy - radius, gx + radius, gy + radius);
+                     __w.drawRect(gx - radius, gy - radius, gx + radius, gy + radius);
                }
                else
                {
                   if (settings.cpFilled)
-                     fillCircle(this.centroid, radius, new Brush(pen.color));
+                     __w.fillCircle(this.centroid, radius, new Brush(__w.pen.color));
                   else
-                     drawCircle(this.centroid, radius);
+                     __w.drawCircle(this.centroid, radius);
                }
             }
  /*        }
@@ -2726,8 +2678,8 @@ function multiPointFigure(imageBounds, caller)
                var d = this.gradientCenter.distanceTo(this.points[i]);
                r = Math.max(r, d);
             }
-            pen = new Pen(0xa0f0f0f0);
-            drawCircle(this.gradientCenter, r);
+            __w.pen = new Pen(0xa0f0f0f0);
+            __w.drawCircle(this.gradientCenter, r);
          }
       }
    }
@@ -3814,12 +3766,11 @@ function PreviewControl_init(parent)
    };
 
    this.stf_CheckBox = new CheckBox( this );
-   with ( this.stf_CheckBox )
-   {
-      foregroundColor = 0xffffffff;
-      text = 'AutoSTF';
-      toolTip = 'ScreenTransferFunction';
-      onCheck = function( checked )
+   { const __w = (this.stf_CheckBox);
+      __w.foregroundColor = 0xffffffff;
+      __w.text = 'AutoSTF';
+      __w.toolTip = 'ScreenTransferFunction';
+      __w.onCheck = function( checked )
       {
          var preview = this.parent.parent.onCustomSTF.call(this, checked);
       }
@@ -3835,17 +3786,16 @@ function PreviewControl_init(parent)
 */
 
    this.buttons_Box   = new Frame(this);
-   with (this.buttons_Box)
-   {
-      backgroundColor = 0xff0078d7;
-      sizer = new HorizontalSizer;
-      sizer.margin = 4;
-      sizer.spacing = 4;
-      sizer.add( this.zoomIn_Button );
-      sizer.add( this.zoomOut_Button );
-      sizer.add( this.zoom11_Button );
-      sizer.addStretch();
-      sizer.add( this.stf_CheckBox );
+   { const __w = (this.buttons_Box);
+      __w.backgroundColor = 0xff0078d7;
+      __w.sizer = new HorizontalSizer;
+      __w.sizer.margin = 4;
+      __w.sizer.spacing = 4;
+      __w.sizer.add( this.zoomIn_Button );
+      __w.sizer.add( this.zoomOut_Button );
+      __w.sizer.add( this.zoom11_Button );
+      __w.sizer.addStretch();
+      __w.sizer.add( this.stf_CheckBox );
    }
 
 
@@ -4095,84 +4045,80 @@ function showOptions_init(strSettings)
    }
 
    this.colorBox = new ColorComboBox( this );
-   with (this.colorBox)
-   {
-      setVariableSize();
-      visible = false;
+   { const __w = (this.colorBox);
+      __w.setVariableSize();
+      __w.visible = false;
 
-      onColorSelected = function ( rgba )
+      __w.onColorSelected = function ( rgba )
       {
-         visible = false;
-         settings[currentKey] = currentColor();
-         dialog.tbx.selectedNodes[0].setIcon(1, colorIcon(currentColor()));
+         this.visible = false;
+         settings[currentKey] = this.currentColor();
+         dialog.tbx.selectedNodes[0].setIcon(1, colorIcon(this.currentColor()));
       }
    }
 
    this.editBox = new Edit(this);
-   with (this.editBox)
-   {
-      setVariableSize();
-      visible = false;
+   { const __w = (this.editBox);
+      __w.setVariableSize();
+      __w.visible = false;
 
-      onEditCompleted = function ()
+      __w.onEditCompleted = function ()
       {
-         visible = false;
+         this.visible = false;
          if (currentType == 'float')
-            settings[currentKey] = text.toNumber();
+            settings[currentKey] = this.text.toNumber();
          else
-            settings[currentKey] = text.toInt();
-         dialog.tbx.selectedNodes[0].setText( 1, text );
+            settings[currentKey] = this.text.toInt();
+         dialog.tbx.selectedNodes[0].setText( 1, this.text );
       }
    }
 
    this.checkButton = new ToolButton(this);
-   with (this.checkButton)
-   {
-      checkable = true;
-      setVariableSize();
-      visible = false;
-      onCheck = function( checked )
+   { const __w = (this.checkButton);
+      __w.checkable = true;
+      __w.setVariableSize();
+      __w.visible = false;
+      __w.onCheck = function( checked )
       {
-         visible = false;
+         this.visible = false;
          settings[currentKey] = checked;
          if (checked)
             dialog.tbx.selectedNodes[0].setText(1, 'yes');
          else
             dialog.tbx.selectedNodes[0].setText(1, 'no');
       }
-      onLeave = function () {visible = false;}
+      __w.onLeave = function () {this.visible = false;}
    }
 
 
    this.tbx = new TreeBox(this);
-   with (this.tbx)
-   {
-      headerVisible     = true;
-      rootDecoration    = false;
-      uniformRowHeight  = true;
-      multipleSelection = false;
-      nodeExpansion     = true;
-      headerVisible     = false;
-      font = new Font(FontFamily.SansSerif, 10);
+   { const __w = (this.tbx);
+      __w.headerVisible     = true;
+      __w.rootDecoration    = false;
+      __w.uniformRowHeight  = true;
+      __w.multipleSelection = false;
+      __w.nodeExpansion     = true;
+      __w.headerVisible     = false;
+      __w.font = new Font(FontFamily.SansSerif, 10);
 
-      setHeaderText( 0, 'Option' );
-      setHeaderText( 1, 'Value' );
+      __w.setHeaderText( 0, 'Option' );
+      __w.setHeaderText( 1, 'Value' );
 
-      viewSettings();
+      __w.viewSettings();
 
-      hideColumn(2);
-      hideColumn(3);
+      __w.hideColumn(2);
+      __w.hideColumn(3);
 
-      adjustColumnWidthToContents(0);
-      adjustColumnWidthToContents(1);
+      __w.adjustColumnWidthToContents(0);
+      __w.adjustColumnWidthToContents(1);
 
-      setMinHeight((numberOfChildren + 1) * nodeRect(child(0)).height);
+      __w.setMinHeight((__w.numberOfChildren + 1) * __w.nodeRect(__w.child(0)).height);
 
       this.editBox.parent  = this.tbx;
       this.colorBox.parent = this.tbx;
       this.checkButton.parent = this.tbx;
 
-      onNodeClicked = function ( item, columnIndex )
+      __w.onNodeClicked = function ( item, columnIndex )
       {
          dialog.editBox.visible = false;
          dialog.colorBox.visible = false;
@@ -4225,7 +4171,7 @@ function showOptions_init(strSettings)
          }
       }
 
-      onNodeDoubleClicked = function ( item, columnIndex )
+      __w.onNodeDoubleClicked = function ( item, columnIndex )
       {
 
          currentKey = item.text(2);
@@ -4247,49 +4193,47 @@ function showOptions_init(strSettings)
 
    function viewSettings()
    {
-      with (dialog.tbx)
-      {
-         clear();
+      { const __w = (dialog.tbx);
+         __w.clear();
 
-         add(NewNode('General', null, null));
-         add(NewNode('Start with recent figures', settings, 'importAllways', 'bool'));
-         add(NewNode('Save drawings to keys', settings, 'persistData', 'bool'));
+         __w.add(NewNode('General', null, null));
+         __w.add(NewNode('Start with recent figures', settings, 'importAllways', 'bool'));
+         __w.add(NewNode('Save drawings to keys', settings, 'persistData', 'bool'));
 
-         add(NewNode('Figure borderline', null, null));
-         add(NewNode('Style yes=solid, no=dashed', settings, 'afLineStyle', 'bool'));
-         add(NewNode('Line color', settings, 'afLineColor', 'color'));
+         __w.add(NewNode('Figure borderline', null, null));
+         __w.add(NewNode('Style yes=solid, no=dashed', settings, 'afLineStyle', 'bool'));
+         __w.add(NewNode('Line color', settings, 'afLineColor', 'color'));
 
-         add(NewNode('Centerpoints', null, null));
-         add(NewNode('Size', settings, 'cpDiameter', 'int'));
-         add(NewNode('Style yes=rectangle, no=circle',   settings, 'cpStyle', 'bool'));
-         add(NewNode('Filled',   settings, 'cpFilled', 'bool'));
-         add(NewNode('Color',    settings, 'cpColor', 'color'));
+         __w.add(NewNode('Centerpoints', null, null));
+         __w.add(NewNode('Size', settings, 'cpDiameter', 'int'));
+         __w.add(NewNode('Style yes=rectangle, no=circle',   settings, 'cpStyle', 'bool'));
+         __w.add(NewNode('Filled',   settings, 'cpFilled', 'bool'));
+         __w.add(NewNode('Color',    settings, 'cpColor', 'color'));
 
-         add(NewNode('Ankerpoints', null, null));
-         add(NewNode('Size', settings, 'apDiameter', 'int'));
-         add(NewNode('Filled',   settings, 'apFilled', 'bool'));
-         add(NewNode('Color',    settings, 'apColor', 'color'));
+         __w.add(NewNode('Ankerpoints', null, null));
+         __w.add(NewNode('Size', settings, 'apDiameter', 'int'));
+         __w.add(NewNode('Filled',   settings, 'apFilled', 'bool'));
+         __w.add(NewNode('Color',    settings, 'apColor', 'color'));
 
-         add(NewNode('Multipoint', null, null));
-         add(NewNode('Bezier',            settings, 'bezier', 'bool'));
-         add(NewNode('Show points',       settings, 'viewAp', 'bool'));
-         add(NewNode('Area transparency', settings, 'transparency', 'float'));
+         __w.add(NewNode('Multipoint', null, null));
+         __w.add(NewNode('Bezier',            settings, 'bezier', 'bool'));
+         __w.add(NewNode('Show points',       settings, 'viewAp', 'bool'));
+         __w.add(NewNode('Area transparency', settings, 'transparency', 'float'));
 
-         add(NewNode('Gradient center', null, null));
-         add(NewNode('Size', settings, 'gpDiameter', 'int'));
-         add(NewNode('Style yes=triangle, no=circle', settings, 'gpStyle', 'bool'));
-         add(NewNode('Filled',      settings, 'gpFilled', 'bool'));
-         add(NewNode('Color',       settings, 'gpColor', 'color'));
+         __w.add(NewNode('Gradient center', null, null));
+         __w.add(NewNode('Size', settings, 'gpDiameter', 'int'));
+         __w.add(NewNode('Style yes=triangle, no=circle', settings, 'gpStyle', 'bool'));
+         __w.add(NewNode('Filled',      settings, 'gpFilled', 'bool'));
+         __w.add(NewNode('Color',       settings, 'gpColor', 'color'));
 
       }
    }
 
    this.defaultButton = new ToolButton(this);
-   with (this.defaultButton)
-   {
-      icon = this.scaledResource( ":/icons/table-download.png" );
-      text = 'Default';
-      onClick = function ( checked )
+   { const __w = (this.defaultButton);
+      __w.icon = this.scaledResource( ":/icons/table-download.png" );
+      __w.text = 'Default';
+      __w.onClick = function ( checked )
       {
          settings = defaultSettings();
          viewSettings();
@@ -4297,13 +4241,12 @@ function showOptions_init(strSettings)
    }
 
    this.okButton = new PushButton(this);
-   with (this.okButton)
-   {
-      icon = this.scaledResource( ":/icons/ok.png" );
-      enabled = true;
-      text = 'OK';
+   { const __w = (this.okButton);
+      __w.icon = this.scaledResource( ":/icons/ok.png" );
+      __w.enabled = true;
+      __w.text = 'OK';
 
-      onClick = function ()
+      __w.onClick = function ()
       {
          Settings.write(ID, DataType.String, JSON.stringify(settings));
          dialog.done(0);
@@ -4311,37 +4254,34 @@ function showOptions_init(strSettings)
    }
 
    this.cancelButton = new PushButton(this);
-   with (this.cancelButton)
-   {
-      icon = this.scaledResource( ":/icons/cancel.png" );
-      text = 'Cancel';
+   { const __w = (this.cancelButton);
+      __w.icon = this.scaledResource( ":/icons/cancel.png" );
+      __w.text = 'Cancel';
 
-      onClick = function ()
+      __w.onClick = function ()
       {
          dialog.done(1);
       }
    }
 
    this.frameButtons = new Frame(this);
-   with (this.frameButtons)
-   {
-      sizer = new HorizontalSizer();
-      sizer.margin = 4;
-      sizer.add(this.defaultButton);
-      sizer.addSpacing (20);
-      sizer.add(this.cancelButton);
-      sizer.addSpacing (20);
-      sizer.add(this.okButton);
-      sizer.addStretch();
+   { const __w = (this.frameButtons);
+      __w.sizer = new HorizontalSizer();
+      __w.sizer.margin = 4;
+      __w.sizer.add(this.defaultButton);
+      __w.sizer.addSpacing (20);
+      __w.sizer.add(this.cancelButton);
+      __w.sizer.addSpacing (20);
+      __w.sizer.add(this.okButton);
+      __w.sizer.addStretch();
    }
 
    this.sizer = new VerticalSizer();
-   with (this.sizer)
-   {
-      margin = 4;
-      add(this.tbx);
-      addSpacing (12);
-      add(this.frameButtons);
+   { const __w = (this.sizer);
+      __w.margin = 4;
+      __w.add(this.tbx);
+      __w.addSpacing (12);
+      __w.add(this.frameButtons);
    }
 
    this.adjustToContents();
@@ -4365,29 +4305,27 @@ function showSelectiveRejection_init(data)
    // begin files section
    //
    this.filesBox = new TreeBox(this);
-   with (this.filesBox)
-   {
+   { const __w = (this.filesBox);
       //
       // create a treebox with 2 columns
       // column 0 contains filenames
       // column 1 contains the full path
       //
-      alternateRowColor = true;
-      numberOfColumns = 2;
-      rootDecoration = false;
-      setMinWidth(400);
-      multipleSelection = true;
-      setHeaderText(0, "FileNames");
-      setHeaderText(1, "FileNames");
-      hideColumn(1);
+      __w.alternateRowColor = true;
+      __w.numberOfColumns = 2;
+      __w.rootDecoration = false;
+      __w.setMinWidth(400);
+      __w.multipleSelection = true;
+      __w.setHeaderText(0, "FileNames");
+      __w.setHeaderText(1, "FileNames");
+      __w.hideColumn(1);
    }
 
    this.btnAddFiles = new PushButton(this);
-   with (this.btnAddFiles)
-   {
-      text = "Add Files";
+   { const __w = (this.btnAddFiles);
+      __w.text = "Add Files";
 
-      onClick  = function()
+      __w.onClick  = function()
       {
          var ofd = new OpenFileDialog();
          ofd.multipleSelections = true;
@@ -4416,11 +4354,10 @@ function showSelectiveRejection_init(data)
    }
 
    this.btnRemoveFiles = new PushButton(this);
-   with (this.btnRemoveFiles)
-   {
-      text = "Remove Files ";
+   { const __w = (this.btnRemoveFiles);
+      __w.text = "Remove Files ";
 
-      onClick  = function()
+      __w.onClick  = function()
       {
          var a = dialog.filesBox.selectedNodes;
          a.reverse();
@@ -4438,11 +4375,10 @@ function showSelectiveRejection_init(data)
 
 
    this.btnClearFiles = new PushButton(this);
-   with (this.btnClearFiles)
-   {
-      text = "Clear";
+   { const __w = (this.btnClearFiles);
+      __w.text = "Clear";
 
-      onClick  = function()
+      __w.onClick  = function()
       {
          dialog.filesBox.clear();
 
@@ -4452,11 +4388,10 @@ function showSelectiveRejection_init(data)
    }
 
    this.checkFullPath = new CheckBox(this);
-   with (this.checkFullPath)
-   {
-      text = "Full Path";
+   { const __w = (this.checkFullPath);
+      __w.text = "Full Path";
 
-      onCheck = function(checked)
+      __w.onCheck = function(checked)
       {
          if (checked)
          {
@@ -4472,34 +4407,31 @@ function showSelectiveRejection_init(data)
    }
 
    var pnlFiles = new VerticalSizer();
-   with (pnlFiles)
-   {
-      margin = 4;
-      add (this.filesBox);
+   { const __w = (pnlFiles);
+      __w.margin = 4;
+      __w.add (this.filesBox);
 
    }
 
    var pnlFilesButtons = new VerticalSizer();
-   with (pnlFilesButtons)
-   {
-      margin = 4;
-      add (this.btnAddFiles);
-      addSpacing(8);
-      add (this.btnRemoveFiles);
-      addSpacing(8);
-      add (this.btnClearFiles);
-      addStretch();
-      add(this.checkFullPath);
+   { const __w = (pnlFilesButtons);
+      __w.margin = 4;
+      __w.add (this.btnAddFiles);
+      __w.addSpacing(8);
+      __w.add (this.btnRemoveFiles);
+      __w.addSpacing(8);
+      __w.add (this.btnClearFiles);
+      __w.addStretch();
+      __w.add(this.checkFullPath);
    }
 
    this.filesGbx  = new GroupBox(this);
-	with (this.filesGbx)
-	{
-		title = "Files";
+	{ const __w = (this.filesGbx);
+		__w.title = "Files";
 
-      sizer = new HorizontalSizer();
-      sizer.add(pnlFiles);
-      sizer.add(pnlFilesButtons);
+      __w.sizer = new HorizontalSizer();
+      __w.sizer.add(pnlFiles);
+      __w.sizer.add(pnlFilesButtons);
    }
    //
    // end files section
@@ -4507,26 +4439,24 @@ function showSelectiveRejection_init(data)
    // begin views section
    //
    this.viewsBox = new TreeBox(this);
-   with (this.viewsBox)
-   {
+   { const __w = (this.viewsBox);
       //
       // create a treebox with 2 columns
       // column 0 contains filenames
       //
-      alternateRowColor = true;
-      numberOfColumns = 1;
-      rootDecoration = false;
-      setMinWidth(400);
-      multipleSelection = true;
-      setHeaderText(0, "Views");
+      __w.alternateRowColor = true;
+      __w.numberOfColumns = 1;
+      __w.rootDecoration = false;
+      __w.setMinWidth(400);
+      __w.multipleSelection = true;
+      __w.setHeaderText(0, "Views");
    }
 
    this.btnAddViews = new PushButton(this);
-   with (this.btnAddViews)
-   {
-      text = "Add Views";
+   { const __w = (this.btnAddViews);
+      __w.text = "Add Views";
 
-      onClick  = function()
+      __w.onClick  = function()
       {
 
          var dlgViewSelect = new showSelectMainviews();
@@ -4549,11 +4479,10 @@ function showSelectiveRejection_init(data)
    }
 
    this.btnRemoveViews = new PushButton(this);
-   with (this.btnRemoveViews)
-   {
-      text = "Remove Views";
+   { const __w = (this.btnRemoveViews);
+      __w.text = "Remove Views";
 
-      onClick  = function()
+      __w.onClick  = function()
       {
          var a = dialog.viewsBox.selectedNodes;
          a.reverse();
@@ -4571,11 +4500,10 @@ function showSelectiveRejection_init(data)
 
 
    this.btnClearViews = new PushButton(this);
-   with (this.btnClearViews)
-   {
-      text = "Clear";
+   { const __w = (this.btnClearViews);
+      __w.text = "Clear";
 
-      onClick  = function()
+      __w.onClick  = function()
       {
          dialog.viewsBox.clear();
 
@@ -4585,52 +4513,47 @@ function showSelectiveRejection_init(data)
    }
 
    var pnlViews = new VerticalSizer();
-   with (pnlViews)
-   {
-      margin = 4;
-      add (this.viewsBox);
+   { const __w = (pnlViews);
+      __w.margin = 4;
+      __w.add (this.viewsBox);
 
    }
 
    var pnlViewsButtons = new VerticalSizer();
-   with (pnlViewsButtons)
-   {
-      margin = 4;
-      add (this.btnAddViews);
-      addSpacing(8);
-      add (this.btnRemoveViews);
-      addSpacing(8);
-      add (this.btnClearViews);
-      addStretch();
+   { const __w = (pnlViewsButtons);
+      __w.margin = 4;
+      __w.add (this.btnAddViews);
+      __w.addSpacing(8);
+      __w.add (this.btnRemoveViews);
+      __w.addSpacing(8);
+      __w.add (this.btnClearViews);
+      __w.addStretch();
    }
 
    this.viewsGbx  = new GroupBox(this);
-	with (this.viewsGbx)
-	{
-		title = "Views";
+	{ const __w = (this.viewsGbx);
+		__w.title = "Views";
 
-      sizer = new HorizontalSizer();
-      sizer.add(pnlViews);
-      sizer.add(pnlViewsButtons);
+      __w.sizer = new HorizontalSizer();
+      __w.sizer.add(pnlViews);
+      __w.sizer.add(pnlViewsButtons);
    }
    //
    // end views section
    //
    this.cancelButton = new PushButton( this );
-   with (this.cancelButton)
-   {
-      text = "Cancel";
-      icon = this.scaledResource( ":/icons/cancel.png" );
-      onClick = function() {dialog.done(0);}
+   { const __w = (this.cancelButton);
+      __w.text = "Cancel";
+      __w.icon = this.scaledResource( ":/icons/cancel.png" );
+      __w.onClick = function() {dialog.done(0);}
    }
 
    this.btnApply = new PushButton( this );
-   with (this.btnApply)
-   {
-      enabled = false;
-      text = "OK";
-      icon = this.scaledResource( ":/icons/execute.png" );
-      onClick = function()
+   { const __w = (this.btnApply);
+      __w.enabled = false;
+      __w.text = "OK";
+      __w.icon = this.scaledResource( ":/icons/execute.png" );
+      __w.onClick = function()
       {
          dialog.btnApply.enabled = false;
          //
@@ -4672,12 +4595,11 @@ function showSelectiveRejection_init(data)
    }
 
    this.okButton = new PushButton( this );
-   with (this.okButton)
-   {
-      enabled = false;
-      text = "OK";
-      icon = this.scaledResource( ":/icons/ok.png" );
-      onClick = function()
+   { const __w = (this.okButton);
+      __w.enabled = false;
+      __w.text = "OK";
+      __w.icon = this.scaledResource( ":/icons/ok.png" );
+      __w.onClick = function()
       {
          dialog.done(0);
       }
@@ -4855,18 +4777,17 @@ function showSelectMainviews_init()
    this.Views = [];
 
    this.viewsBox = new TreeBox(this);
-   with (this.viewsBox)
-   {
+   { const __w = (this.viewsBox);
       //
       // create a treebox with 2 columns
       // column 0 contains filenames
       //
-      alternateRowColor = true;
-      numberOfColumns = 1;
-      rootDecoration = false;
-      setMinWidth(400);
-      multipleSelection = true;
-      setHeaderText(0, "Views");
+      __w.alternateRowColor = true;
+      __w.numberOfColumns = 1;
+      __w.rootDecoration = false;
+      __w.setMinWidth(400);
+      __w.multipleSelection = true;
+      __w.setHeaderText(0, "Views");
 
       var a = getAllMainViews();
 
@@ -4878,19 +4799,17 @@ function showSelectMainviews_init()
    }
 
    this.cancelButton = new PushButton( this );
-   with (this.cancelButton)
-   {
-      text = "Cancel";
-      icon = this.scaledResource( ":/icons/cancel.png" );
-      onClick = function() {dialog.done(1);}
+   { const __w = (this.cancelButton);
+      __w.text = "Cancel";
+      __w.icon = this.scaledResource( ":/icons/cancel.png" );
+      __w.onClick = function() {dialog.done(1);}
    }
 
    this.okButton = new PushButton( this );
-   with (this.okButton)
-   {
-      text = "OK";
-      icon = this.scaledResource( ":/icons/ok.png" );
-      onClick = function()
+   { const __w = (this.okButton);
+      __w.text = "OK";
+      __w.icon = this.scaledResource( ":/icons/ok.png" );
+      __w.onClick = function()
       {
          for (var i = 0; i < dialog.viewsBox.selectedNodes.length; i++)
          {
