@@ -5,6 +5,50 @@ All notable changes to this repository will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] — 2026-05-28
+
+### Added
+
+- **GAME.js** (v1.8.1-v8) — V8 port of Hartmut V. Bornemann's *GAME —
+  Interactive Galaxy Mask Editor* (originally 2017, latest legacy
+  release 1.8.1 from 09/03/2024). Same math, UI, defaults, settings
+  keys and persisted view properties as the original. V8-required
+  changes only:
+  - `#engine v8`, `CoreApplication.ensureMinimumVersion(1, 9, 4)`;
+    feature-id moved from `Utilities > GAME` to `salvolm > GAME` to
+    match the rest of this repo.
+  - All 19 `#include <pjsr/*.jsh>` removed; 39 underscore-style
+    constants (`MouseButton_Left`, `StdIcon_Warning`, `PenStyle_Solid`,
+    `KeyModifier_Control`, etc.) rewritten to the V8 dotted form
+    (`MouseButton.Left`, …).
+  - 23 `Class.prototype.Member` enum accesses on `PixelMath`,
+    `Convolution`, `MultiscaleLinearTransform`, `CurvesTransformation`,
+    `MorphologicalTransformation` rewritten to `Class.Member`.
+  - All 5 prototype-style `this.__base__ = Dialog/Frame;
+    this.__base__();` constructors (`showDialog`, `PreviewControl`,
+    `showOptions`, `showSelectiveRejection`, `showSelectMainviews`)
+    replaced with tiny ES6 `class extends` shells that `super()` then
+    trampoline to a non-strict `*_init` function. This preserves the
+    script's 88 `with (this.foo) { … }` blocks, which would be
+    SyntaxErrors inside an implicit-strict class body.
+  - `View.viewById` / `ImageWindow.windowById` now return `null` (not
+    an invalid object) under V8. Three call sites (`createMask` finish
+    loop, `getNewName`, `applyToViews`) audited and guarded.
+  - The 5 trailing `XXX.prototype = new Dialog;` assignments deleted
+    (silent no-op under V8).
+- README, CHANGELOG, per-file-licensing table updated for the fourth
+  script. Attribution preserves Hartmut V. Bornemann's 2017 copyright
+  and the original script's acknowledgements to Ken Meyfroodt, Adam
+  Block, Andres del Pozo, and the PixInsight-Austria user group.
+
+### Notes
+
+- GAME.js has been syntax-validated with Node but not yet smoke-tested
+  inside PixInsight 1.9.4 under V8. A couple of constants
+  (`MouseButton.*`, `KeyModifier.Control`) follow the standard
+  `Class.Member` convention without explicit guidance in the V8
+  porting guide; please report any runtime issues via the Issues tab.
+
 ## [1.0.2] — 2026-05-28
 
 ### Fixed

@@ -1,7 +1,7 @@
 # pixinsight-scripts
 
 A small collection of PJSR scripts for **PixInsight 1.9.4 Lockhart** and later
-(the new V8 JavaScript runtime). Two are V8 ports of existing tools, one is
+(the new V8 JavaScript runtime). Three are V8 ports of existing tools, one is
 original.
 
 > All scripts target the V8 runtime introduced in PI 1.9.4. They do **not**
@@ -65,8 +65,8 @@ To make all three scripts appear together under their own submenu:
 2. Click **Add**.
 3. In the folder picker, navigate to the folder from Step 1 (the one
    containing the `.js` files — **not** an individual file) and confirm.
-4. PixInsight scans the folder, finds the three `#feature-id`-tagged
-   scripts, and lists them in the dialog. Make sure all three are
+4. PixInsight scans the folder, finds the four `#feature-id`-tagged
+   scripts, and lists them in the dialog. Make sure all four are
    checked.
 5. Click **Done**.
 
@@ -74,6 +74,7 @@ The Script menu now contains:
 
 - **Script ▸ salvolm ▸ FITS Reviewer**
 - **Script ▸ salvolm ▸ FWHMEccentricity**
+- **Script ▸ salvolm ▸ GAME**
 - **Script ▸ salvolm ▸ VeraLux HyperMetric Stretch**
 
 No restart needed. The registration persists across PixInsight sessions.
@@ -224,20 +225,80 @@ and the math here is re-derived from the canonical Python source.
 
 ---
 
+### GAME.js
+
+V8-runtime port of **Hartmut V. Bornemann's** *GAME — Interactive Galaxy
+Mask Editor* (version 1.8.1). GAME is a graphical editor that lets you
+draw an unlimited number of elliptical or freeform multipoint shapes
+directly on the active view and bake them into a soft, gradient-filled
+galaxy mask. Each ellipse is defined by five anchor points (centre +
+four peripheral points for rotation and scaling); freeform areas accept
+arbitrarily many points and can be dragged by their centroid.
+
+The math, UI, defaults, settings keys, and persisted view properties
+are identical to Hartmut's original. Only V8-required plumbing changed:
+
+* `#engine v8` directive; `CoreApplication.ensureMinimumVersion(1, 9, 4)`.
+* All 19 `#include <pjsr/*.jsh>` directives removed — constants are now
+  accessed via their V8 host classes (`StdButton.Yes`, `MouseButton.Left`,
+  `TextAlign.Center`, `UndoFlag.NoSwapFile`, `PenStyle.Solid`, `StdIcon.*`,
+  `KeyModifier.Control`, `Compression.ZLib`, `FontFamily.SansSerif`, etc.).
+  39 underscore-style constants (`MouseButton_Left`, `StdIcon_Warning`, …)
+  rewritten to dotted form.
+* All 5 prototype-style `this.__base__ = Dialog/Frame; this.__base__();`
+  constructors (`showDialog`, `PreviewControl`, `showOptions`,
+  `showSelectiveRejection`, `showSelectMainviews`) now ES6 `class extends`
+  shells that call `super()` then trampoline to a non-strict `*_init`
+  function. This keeps the script's 88 `with (this.foo) { … }` blocks
+  legal — class bodies are implicit strict mode where `with` is a syntax
+  error.
+* 23 `Class.prototype.Member` enum accesses on process classes
+  (`PixelMath`, `Convolution`, `MultiscaleLinearTransform`,
+  `CurvesTransformation`, `MorphologicalTransformation`) rewritten to
+  `Class.Member`.
+* `View.viewById` / `ImageWindow.windowById` null-checks: V8 returns
+  `null` where SpiderMonkey returned an invalid object with
+  `.isNull === true`. Three call sites (`createMask` finish loop,
+  `getNewName`, `applyToViews`) now handle both cases.
+* The 5 `XXX.prototype = new Dialog;` assignments at the bottom of the
+  file deleted (they silently no-op under V8 and trigger errors if
+  reached before the class declaration).
+
+PI menu entry: **Script ▸ salvolm ▸ GAME** (the original registered
+under `Utilities`; moved to match this repo's submenu convention).
+
+> **Note:** GAME has not yet been smoke-tested in PixInsight under V8.
+> The port is mechanical and syntax-validates cleanly with Node, but a
+> handful of constants (`MouseButton.*`, `KeyModifier.Control`) follow
+> the standard `Class.Member` convention without explicit documentation
+> in the official V8 porting guide. Please report any runtime issues
+> via the Issues tab — they are likely to be one-line fixes.
+
+License: original GAME script is Copyright © 2017 Hartmut V. Bornemann
+(<hvb356@hotmail.de>). The V8 porting changes are released alongside
+this repository under GPL-3.0-or-later; the underlying algorithm and
+the substantive code remain Hartmut's. See the file's header comment
+for the original copyright notice and acknowledgements.
+
+---
+
 ## Per-file licensing
 
-The repository's top-level [LICENSE](LICENSE) is GPL-3.0. Two of the three
+The repository's top-level [LICENSE](LICENSE) is GPL-3.0. Three of the four
 scripts inherit licenses from upstream:
 
-| File                              | License                              |
-| --------------------------------- | ------------------------------------ |
-| `FitsReviewer.js`                 | GPL-3.0-or-later                     |
-| `FWHMEccentricity.js`             | PixInsight Class Library License 2.0 |
-| `VeraLux_HyperMetric_Stretch.js`  | GPL-3.0-or-later                     |
+| File                              | License                                                   |
+| --------------------------------- | --------------------------------------------------------- |
+| `FitsReviewer.js`                 | GPL-3.0-or-later                                          |
+| `FWHMEccentricity.js`             | PixInsight Class Library License 2.0                      |
+| `VeraLux_HyperMetric_Stretch.js`  | GPL-3.0-or-later                                          |
+| `GAME.js`                         | © 2017 Hartmut V. Bornemann; V8 porting changes GPL-3.0-or-later |
 
 The PCL Class Library License 2.0 is a permissive BSD-style license and is
 GPL-3.0-compatible, so the mixed-license collection redistributes cleanly.
-See each file's header for the full notice.
+GAME.js carries its original copyright; the V8 porting work here is
+released under GPL-3.0-or-later in line with this repository's top-level
+LICENSE. See each file's header for the full notice.
 
 ## Credits
 
@@ -245,6 +306,12 @@ See each file's header for the full notice.
   Riccardo Paterniti (<https://veralux.space/>).
 * **FWHMEccentricity** — original PJSR implementation by Mike Schuster,
   released through Pleiades Astrophoto.
+* **GAME** — original PJSR implementation by Hartmut V. Bornemann
+  (<hvb356@hotmail.de>), released 2017. Acknowledgements from the
+  original script: Ken Meyfroodt (mask smoothing code), Adam Block
+  (PixelMath expression and selective rejection concept from the
+  PixInsight forum), Andres del Pozo (PreviewControl.js), and the
+  PixInsight-Austria user group.
 * **PixInsight V8 PJSR runtime** — Juan Conejero / Pleiades Astrophoto. The
   porting work here follows the official
   [V8 Script Porting Guide](https://pixinsight.com/developer/pjsr/) (2026).
