@@ -975,13 +975,11 @@ function createResampleImageWindow(
       columns, rows, 1, ColorSpace.Gray, 32, PixelSampleType.Float
    );
 
-   var scaledPartition = new Array;
    for (var i = 0; i != rows; ++i) {
       for (var j = 0; j != columns; ++j) {
-       scaledPartition.push(partitionScale * partition[i][j]);
+         resampleImage.setSample(partitionScale * partition[i][j], j, i);
       }
    }
-   resampleImage.setPixels(scaledPartition);
 
    var resampleImageWindow = new ImageWindow(
       columns, rows, 1, 32, true, false, uniqueViewIdNoLeadingZero(id + "_map")

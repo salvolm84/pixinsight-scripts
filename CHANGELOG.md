@@ -5,6 +5,17 @@ All notable changes to this repository will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2] — 2026-05-28
+
+### Fixed
+
+- **FWHMEccentricity.js** — clicking the **Support** button raised
+  `TypeError: resampleImage.setPixels is not a function` and aborted
+  contour-map generation. The legacy `Image.setPixels(flatArray)` method
+  is not available in the V8 PJSR runtime; replaced with a
+  `setSample(value, x, y)` loop over the (small) partition grid in
+  `createResampleImageWindow`.
+
 ## [1.0.1] — 2026-05-26
 
 ### Changed
